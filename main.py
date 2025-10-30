@@ -1,23 +1,26 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 
 app = FastAPI()
 
-active_servers = {}  # Para pruebas, simula base de datos
+# Base de datos simulada
+servers = {}
 
-class ActivatePlan(BaseModel):
-    guild_id: int
+@app.get("/")
+def home():
+    return {"status": "DeskBot API running"}
 
 @app.get("/check/{guild_id}")
-def check_plan(guild_id: int):
-    return {"active": active_servers.get(guild_id, False)}
+def check_server(guild_id: int):
+    active = servers.get(guild_id, False)
+    return {"active": active}
 
-@app.post("/activate")
-def activate_plan(data: ActivatePlan):
-    active_servers[data.guild_id] = True
-    return {"message": f"Guild {data.guild_id} activated."}
+@app.post("/activate/{guild_id}")
+def activate_server(guild_id: int):
+    servers[guild_id] = True
+    return {"active": True}
 
-@app.post("/deactivate")
-def deactivate_plan(data: ActivatePlan):
-    active_servers[data.guild_id] = False
-    return {"message": f"Guild {data.guild_id} deactivated."}
+# Arranque del servidor
+import uvicorn
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
